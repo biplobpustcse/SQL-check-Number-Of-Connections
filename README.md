@@ -51,6 +51,7 @@ EXEC(@killCommand);
 ```
 
 ```
+------------------------####### c# method #######--------------------------
 public bool RefreshDatabaseConnections()
         {
             using (var command = _context.CreateCommand())
