@@ -69,7 +69,7 @@ public bool RefreshDatabaseConnections()
 
                 SELECT @killCommand = @killCommand + 'KILL ' + CONVERT(VARCHAR(5), session_id) + '; '
                 FROM sys.dm_exec_sessions
-                WHERE status LIKE '%sleeping%' AND  database_id = DB_ID('" + databaseName + @"') -- Your database name
+                WHERE (status LIKE '%sleeping%' OR status LIKE '%suspended%') AND  database_id = DB_ID('" + databaseName + @"') -- Your database name
                 AND session_id <> @CurrentSessionID; -- Exclude the current session
 
                 EXEC(@killCommand); ");
