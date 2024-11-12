@@ -10,7 +10,7 @@ FROM
     sys.sysprocesses
 WHERE 
     dbid > 0 
-	AND DB_NAME(dbid)='TestDB'--database name
+	AND DB_NAME(dbid)='Test_DB'--database name
 GROUP BY 
     dbid, loginame
 ```
@@ -30,7 +30,7 @@ FROM
     sys.sysprocesses
 WHERE 
     dbid > 0 
-    AND DB_NAME(dbid)='CloudPOS_DB_GHORERBAZAR'
+    AND DB_NAME(dbid)='Test_DB'
 ORDER BY 
     last_batch DESC
 ```
@@ -42,10 +42,20 @@ SELECT @CurrentSessionID = @@SPID;
 
 DECLARE @killCommand VARCHAR(MAX) = '';
 
-SELECT @killCommand = @killCommand + 'KILL ' + CONVERT(VARCHAR(5), session_id) + '; '
-FROM sys.dm_exec_sessions
-WHERE (status LIKE '%sleeping%' OR status LIKE '%suspended%') AND  database_id = DB_ID('CloudPOS_DB_GHORERBAZAR') -- Your database name
-  AND session_id <> @CurrentSessionID; -- Exclude the current session
+IF(SELECT COUNT(dbid) AS NumberOfConnections FROM sys.sysprocesses WHERE dbid > 0 AND DB_NAME(dbid)='Test_DB')>120
+BEGIN 
+	SELECT @killCommand = @killCommand + 'KILL ' + CONVERT(VARCHAR(5), session_id) + '; '
+	FROM sys.dm_exec_sessions
+	WHERE database_id = DB_ID('Test_DB') -- Your database name
+	AND session_id <> @CurrentSessionID; -- Exclude the current session
+END
+ELSE
+BEGIN
+	SELECT @killCommand = @killCommand + 'KILL ' + CONVERT(VARCHAR(5), session_id) + '; '
+	FROM sys.dm_exec_sessions
+	WHERE (status LIKE '%sleeping%' OR status LIKE '%suspended%') AND  database_id = DB_ID('Test_DB') -- Your database name
+	AND session_id <> @CurrentSessionID; -- Exclude the current session
+END
 
 EXEC(@killCommand);
 ```
